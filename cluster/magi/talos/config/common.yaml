@@ -1,0 +1,61 @@
+cluster:
+  allowSchedulingOnControlPlanes: true
+  network:
+    cni:
+      name: none
+  proxy:
+    disabled: true
+
+machine:
+  type: controlplane
+  kubelet:
+    extraMounts:
+      - destination: /var/mnt/nvme1
+        type: bind
+        source: /var/mnt/nvme1
+        options:
+          - bind
+          - rshared
+          - rw
+      - destination: /var/mnt/nvme2
+        type: bind
+        source: /var/mnt/nvme2
+        options:
+          - bind
+          - rshared
+          - rw
+  network:
+    interfaces:
+      - interface: bond0
+        vip:
+          ip: fd7a:6e5b:cafe:10::5
+        vlans:
+          - vlanId: 15
+            dhcp: false
+            addresses: []
+          - vlanId: 20
+            dhcp: false
+            addresses: []
+          - vlanId: 25
+            dhcp: false
+            addresses: []
+  install:
+    bootloader: true
+    wipe: true
+    image: factory.talos.dev/installer/8f85ef12ec6c83f2316356429381f46744417b8a3cacde5756424ecb19fac9fe:v1.12.4
+  kernel:
+    modules:
+      - name: nvme_tcp
+      - name: vfio_pci
+  sysctls:
+    vm.nr_hugepages: "1024"
+
+---
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: nut-client
+configFiles:
+  - content: |-
+      MONITOR forza@10.1.0.79 1 observer OBSERVER_PASSWORD_HERE secondary
+      SHUTDOWNCMD "/sbin/poweroff"
+    mountPath: /usr/local/etc/nut/upsmon.conf

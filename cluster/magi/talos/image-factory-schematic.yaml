@@ -1,0 +1,14 @@
+customization:
+  systemExtensions:
+    officialExtensions:
+      - siderolabs/iscsi-tools
+      - siderolabs/util-linux-tools
+      - siderolabs/i915-ucode
+      - siderolabs/intel-ucode
+      - siderolabs/thunderbolt
+      - siderolabs/nut-client
+  extraKernelArgs:
+    - intel_iommu=on
+    - iommu=pt
+    - mitigations=off
+    - net.ifnames=0

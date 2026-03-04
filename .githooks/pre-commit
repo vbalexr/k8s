@@ -1,0 +1,28 @@
+#!/bin/sh
+set -e
+
+staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ya?ml)$' || true)
+
+if [ -z "$staged_files" ]; then
+  exit 0
+fi
+
+fail=0
+
+for f in $staged_files; do
+  content=$(git show ":$f" 2>/dev/null || true)
+
+  echo "$content" | grep -q '^[[:space:]]*kind:[[:space:]]*Secret[[:space:]]*$' || continue
+  echo "$content" | grep -q '^[[:space:]]*\(data\|stringData\):' || continue
+  echo "$content" | grep -q '^[[:space:]]*sops:' && continue
+
+  echo "ERROR: $f appears to be an unencrypted Secret (missing sops metadata)." >&2
+  fail=1
+ done
+
+if [ "$fail" -ne 0 ]; then
+  echo "Encrypt secrets with sops before committing." >&2
+  exit 1
+fi
+
+exit 0

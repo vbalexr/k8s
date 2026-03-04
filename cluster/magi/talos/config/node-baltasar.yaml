@@ -1,0 +1,37 @@
+machine:
+  network:
+    interfaces:
+      - interface: bond0
+        dhcp: false
+        bond:
+          mode: 802.3ad
+          lacpRate: fast
+          miimon: 100
+          interfaces:
+            - eth0
+            - eth1
+        addresses:
+          - fd7a:6e5b:cafe:10::6/64
+          - 10.1.0.6/22
+        routes:
+          - network: ::/0
+            gateway: fd7a:6e5b:cafe:10::1
+          - network: 0.0.0.0/0
+            gateway: 10.1.0.1
+      - interface: eth2
+        dhcp: false
+        addresses:
+          - fd7a:6e5b:beff::6/64
+          - 10.255.100.6/24
+      - interface: eth3
+        dhcp: false
+        addresses:
+          - fd7a:6e5b:befe::6/64
+          - 10.255.200.6/24
+  install:
+    disk: /dev/nvme2n1
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+hostname: baltasar
+auto: off
