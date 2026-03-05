@@ -3,6 +3,12 @@ cluster:
   network:
     cni:
       name: none
+    podSubnets:
+      - 10.41.0.0/16
+      - fd7a:41::/48
+    serviceSubnets:
+      - 10.42.0.0/16
+      - fd7a:42::/112
   proxy:
     disabled: true
 
@@ -10,21 +16,24 @@ machine:
   type: controlplane
   kubelet:
     extraMounts:
-      - destination: /var/mnt/nvme1
+      - destination: /var/mnt/longhorn-disk1
         type: bind
-        source: /var/mnt/nvme1
+        source: /var/mnt/longhorn-disk1
         options:
           - bind
           - rshared
           - rw
-      - destination: /var/mnt/nvme2
+      - destination: /var/mnt/longhorn-disk2
         type: bind
-        source: /var/mnt/nvme2
+        source: /var/mnt/longhorn-disk2
         options:
           - bind
           - rshared
           - rw
   network:
+    nameservers:
+      - 10.1.0.1
+      - fd7a:6e5b:cafe:10::1
     interfaces:
       - interface: bond0
         vip:

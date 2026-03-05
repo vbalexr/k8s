@@ -40,4 +40,4 @@ spec:
   volumes:
     - name: data
       persistentVolumeClaim:
-        claimName: fio-pvc
+        claimName: fio-rwo-pvc

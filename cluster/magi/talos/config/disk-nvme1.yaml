@@ -1,7 +1,0 @@
-apiVersion: v1alpha1
-kind: UserVolumeConfig
-name: nvme1
-volumeType: disk
-provisioning:
-  diskSelector:
-    match: disk.dev_path == "/dev/nvme0n1"
