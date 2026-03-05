@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kube-multus-ds
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      initContainers:
+        # Fix race condition bug in install-multus-binary container
+        - name: install-multus-binary
+          command:
+            - "/usr/src/multus-cni/bin/install_multus"
+            - "-d"
+            - "/host/opt/cni/bin"
+            - "-t"
+            - "thick"
+      containers:
+        # Increase resource limits to prevent OOM issues
+        - name: kube-multus
+          resources:
+            limits:
+              cpu: 300m
+              memory: 150Mi
+            requests:
+              cpu: 200m
+              memory: 100Mi
+      volumes:
+        # Change mount path from /run/netns to /var/run/netns for Talos
+        - name: host-run-netns
+          hostPath:
+            path: /var/run/netns/

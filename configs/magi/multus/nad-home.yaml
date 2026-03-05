@@ -1,0 +1,28 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: home
+  namespace: multus
+spec:
+  config: |
+    {
+      "cniVersion": "0.3.1",
+      "type": "macvlan",
+      "master": "bond0.15",
+      "mode": "bridge",
+      "ipam": {
+        "type": "host-local",
+        "ranges": [
+          [
+            {
+              "subnet": "172.16.15.0/24"
+            }
+          ],
+          [
+            {
+              "subnet": "fd7a:6e5b:beff:15:1::/120"
+            }
+          ]
+        ]
+      }
+    }

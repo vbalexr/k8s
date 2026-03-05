@@ -1,0 +1,22 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: longhorn
+  namespace: flux-system
+spec:
+  interval: 30m
+  targetNamespace: longhorn-system
+  chart:
+    spec:
+      chart: longhorn
+      sourceRef:
+        kind: HelmRepository
+        name: longhorn
+        namespace: flux-system
+      interval: 1h
+  values:
+    defaultSettings:
+      defaultReplicaCount: 2
+      defaultDataLocality: best-effort
+    persistence:
+      defaultClass: true

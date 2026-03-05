@@ -1,4 +1,8 @@
 machine:
+  kubelet:
+    nodeIP:
+      validSubnets:
+        - 10.255.100.0/24
   network:
     interfaces:
       - interface: bond0
@@ -29,9 +33,26 @@ machine:
           - fd7a:6e5b:befe::6/64
           - 10.255.200.6/24
   install:
-    disk: /dev/nvme2n1
+    diskSelector:
+      serial: 2N182L15CJGA
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
 hostname: baltasar
 auto: off
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: longhorn-disk1
+volumeType: disk
+provisioning:
+  diskSelector:
+    match: disk.serial == "50026B72836AD7A4"
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: longhorn-disk2
+volumeType: disk
+provisioning:
+  diskSelector:
+    match: disk.serial == "50026B7686F98879"

@@ -1,4 +1,8 @@
 machine:
+  kubelet:
+    nodeIP:
+      validSubnets:
+        - 10.255.100.0/24
   network:
     interfaces:
       - interface: bond0
@@ -29,9 +33,26 @@ machine:
           - fd7a:6e5b:befe::7/64
           - 10.255.200.7/24
   install:
-    disk: /dev/nvme2n1
+    diskSelector:
+      serial: 2M322LACB8FL
 ---
 apiVersion: v1alpha1
 kind: HostnameConfig
 hostname: casper
 auto: off
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: longhorn-disk1
+volumeType: disk
+provisioning:
+  diskSelector:
+    match: disk.serial == "50026B7686F988A3"
+---
+apiVersion: v1alpha1
+kind: UserVolumeConfig
+name: longhorn-disk2
+volumeType: disk
+provisioning:
+  diskSelector:
+    match: disk.serial == "50026B72836AD043"

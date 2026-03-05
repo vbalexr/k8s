@@ -43,16 +43,15 @@ talosctl gen secrets -o cluster/magi/talos/talos-secrets.yaml
 Edit the node files and confirm the install disk matches your OS disk (should be the smallest NVMe, typically `/dev/nvme0n1`):
 - [cluster/magi/talos/config/node-baltasar.yaml](cluster/magi/talos/config/node-baltasar.yaml)
 - [cluster/magi/talos/config/node-casper.yaml](cluster/magi/talos/config/node-casper.yaml)
-- [cluster/magi/talos/config/node-melchior.yaml](cluster/magi/talos/config/node-melchior.yaml)
+- [cluster/magi/talos/config/node-melchior.yaml](cluster/magi/talos/config/
 
-Disk volume configurations (both NVMe drives will be mounted for Longhorn):
-- [cluster/magi/talos/config/disk-nvme1.yaml](cluster/magi/talos/config/disk-nvme1.yaml) - Mounts first large NVMe at `/var/mnt/longhorn-nvme1`
-- [cluster/magi/talos/config/disk-nvme2.yaml](cluster/magi/talos/config/disk-nvme2.yaml) - Mounts second large NVMe at `/var/mnt/longhorn-nvme2`
+Each node config must include `kubelet.nodeIP.validSubnets` pointing to the eth2 network (10.255.100.0/24) so that Cilium uses eth2 for pod-to-pod traffic instead of bond0.
 
 Optional adjustments (if needed):
 - Bond mode (`active-backup` vs `802.3ad`)
 - Default route and DNS servers under `machine.network`
-- Install disk device name if different from `/dev/nvme2n1`
+- Install disk device serial
+- Aditional disk devices serials
 
 ## 4) Generate machine configs
 Generate one config per node:
@@ -63,8 +62,6 @@ mkdir -p cluster/magi/talos/generated
 talosctl gen config magi https://magi.vbalex.com:6443 \
   --with-secrets cluster/magi/talos/talos-secrets.yaml \
   --config-patch @cluster/magi/talos/config/common.yaml \
-  --config-patch @cluster/magi/talos/config/disk-nvme1.yaml \
-  --config-patch @cluster/magi/talos/config/disk-nvme2.yaml \
   --config-patch @cluster/magi/talos/config/node-baltasar.yaml \
   --output cluster/magi/talos/generated/baltasar.yaml \
   --output-types controlplane
@@ -72,8 +69,6 @@ talosctl gen config magi https://magi.vbalex.com:6443 \
 talosctl gen config magi https://magi.vbalex.com:6443 \
   --with-secrets cluster/magi/talos/talos-secrets.yaml \
   --config-patch @cluster/magi/talos/config/common.yaml \
-  --config-patch @cluster/magi/talos/config/disk-nvme1.yaml \
-  --config-patch @cluster/magi/talos/config/disk-nvme2.yaml \
   --config-patch @cluster/magi/talos/config/node-casper.yaml \
   --output cluster/magi/talos/generated/casper.yaml \
   --output-types controlplane
@@ -81,8 +76,6 @@ talosctl gen config magi https://magi.vbalex.com:6443 \
 talosctl gen config magi https://magi.vbalex.com:6443 \
   --with-secrets cluster/magi/talos/talos-secrets.yaml \
   --config-patch @cluster/magi/talos/config/common.yaml \
-  --config-patch @cluster/magi/talos/config/disk-nvme1.yaml \
-  --config-patch @cluster/magi/talos/config/disk-nvme2.yaml \
   --config-patch @cluster/magi/talos/config/node-melchior.yaml \
   --output cluster/magi/talos/generated/melchior.yaml \
   --output-types controlplane
@@ -110,19 +103,19 @@ Then apply the matching config to each node using its current DHCP IP (replace `
 ```sh
 # Baltasar
 talosctl apply-config \
-  -n <baltasar-dhcp-ip> \
+  -n IP \
   -f cluster/magi/talos/generated/baltasar.yaml \
   --insecure
 
 # Casper
 talosctl apply-config \
-  -n <casper-dhcp-ip> \
+  -n IP \
   -f cluster/magi/talos/generated/casper.yaml \
   --insecure
 
 # Melchior
 talosctl apply-config \
-  -n <melchior-dhcp-ip> \
+  -n IP \
   -f cluster/magi/talos/generated/melchior.yaml \
   --insecure
 ```
@@ -161,6 +154,7 @@ You should see:
 ## 9) Install Cilium
 
 cilium install \
+    --set ipv6.enabled=true \
     --set ipam.mode=kubernetes \
     --set kubeProxyReplacement=true \
     --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
@@ -171,4 +165,5 @@ cilium install \
     --set k8sServicePort=7445 \
     --set gatewayAPI.enabled=true \
     --set gatewayAPI.enableAlpn=true \
-    --set gatewayAPI.enableAppProtocol=true
+    --set gatewayAPI.enableAppProtocol=true \
+    --set bgpControlPlane.enabled=true 
