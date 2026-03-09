@@ -3,3 +3,4 @@ kind: Kustomization
 resources:
   - infra-controllers.yaml
   - infra-configs.yaml
+  - namespace-databases.yaml

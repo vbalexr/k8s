@@ -1,0 +1,28 @@
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name:  mariadb-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 128Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  annotations:
+    metallb.io/address-pool: prod-services
+spec:
+  externalTrafficPolicy: Local
+  type: LoadBalancer
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+    - IPv4
+    - IPv6

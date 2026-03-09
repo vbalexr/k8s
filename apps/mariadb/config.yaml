@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mariadb-cnf
+data:
+  mariadb.cnf: |
+    [server]
+
+    [mariadbd]
+
+    #user                    = mysql
+    pid-file                = /run/mysqld/mysqld.pid
+    basedir                 = /usr
+
+    #
+    # * Fine Tuning
+    #
+
+    key_buffer_size        = 512M
+    #max_allowed_packet     = 1G
+    #thread_stack           = 192K
+    #thread_cache_size      = 8
+    # This replaces the startup script and checks MyISAM tables if needed
+    # the first time they are touched
+    #myisam_recover_options = BACKUP
+    #max_connections        = 100
+    #table_cache            = 64
+
+    #server-id              = 1
+    #log_bin                = /var/log/mysql/mysql-bin.log
+    expire_logs_days        = 10
+    #max_binlog_size        = 100M
+    innodb_buffer_pool_size = 5120M
+    log-warnings = 1
+
+    [embedded]
+
+    [mariadbd]
+
+    [mariadb-11.5]

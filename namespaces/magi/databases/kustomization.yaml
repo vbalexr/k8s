@@ -4,5 +4,10 @@ namespace: databases
 resources:
   - namespace.yaml
   - ../../../apps/redis
+
+  - ../../../apps/mariadb
+  - mariadb-credentials.yaml
+
 patches:
   - path: patches/redis.yaml
+  - path: patches/mariadb.yaml
