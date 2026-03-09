@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: immich-postgres-config
+type: Opaque
+stringData:
+    host: postgres.databases.svc.cluster.local
+    port: "5432"
+    user: "immich"
+    password: "Qj9OzJqE1hRa"

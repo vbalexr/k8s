@@ -5,8 +5,13 @@ resources:
   - namespace.yaml
   - ../../../apps/mosquitto
   - ../../../apps/zigbee2mqtt
+
+  - immich-postgres-config.yaml
+  - immich-redis-config.yaml
+  - ../../../apps/immich
  
 patches:
   - path: patches/mosquitto.yaml
   - path: patches/zigbee2mqtt.yaml
+  - path: patches/immich.yaml
   

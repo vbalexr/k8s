@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: immich-redis-config
+type: Opaque
+stringData:
+    host: redis.databases.svc.cluster.local
+    port: "6379"
