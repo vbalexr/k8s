@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buyback
+  labels:
+    app: buyback
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buyback
+  template:
+    metadata:
+      labels:
+        app: buyback
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: buyback
+        image: mrakaki/dev-containers:mrakaki-eve-buyback.0.0.3
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production
+        - name: SPRING_CONFIG_IMPORT
+          value: configserver:http://configuration:8888
+        ports:
+          - name: http
+            containerPort: 8080
+        resources:
+          requests:
+            memory: "300Mi"
+            cpu: "300m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 2022
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 2022
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 30

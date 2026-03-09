@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - configuration.yaml
+  - configuration-service.yaml
+
+  - authentication.yaml
+  - authentication-service.yaml
+
+  - universe.yaml
+  - universe-service.yaml
+  - universe-cronjobs.yaml
+
+  - buyback.yaml
+  - buyback-service.yaml
+

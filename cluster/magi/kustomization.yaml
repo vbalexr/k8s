@@ -6,3 +6,4 @@ resources:
   - namespace-databases.yaml
   - namespace-sspti.yaml
   - namespace-tunnels.yaml
+  - namespace-mrakaki.yaml

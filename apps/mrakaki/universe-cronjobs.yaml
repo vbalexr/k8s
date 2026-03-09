@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: universe-update-orders
+  namespace: mrakaki
+spec:
+  schedule: "15 */4 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+          - name: universe
+            image: mrakaki/dev-containers:mrakaki-eve-universe.0.0.5
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+            args:
+              - updateOrders
+            env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production
+            - name: SPRING_CONFIG_IMPORT
+              value: configserver:http://configuration:8888
+            resources:
+              requests:
+                memory: "768Mi"
+                cpu: "750m"
+              limits:
+                memory: "1Gi"
+                cpu: "1000m"
+          restartPolicy: OnFailure

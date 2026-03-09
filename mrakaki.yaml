@@ -1,0 +1,345 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mrakaki
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentication
+  namespace: mrakaki
+spec:
+  ipFamilies:
+  - IPv4
+  - IPv6
+  ipFamilyPolicy: PreferDualStack
+  ports:
+  - name: http
+    port: 8080
+  selector:
+    app: authentication
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: buyback
+  namespace: mrakaki
+spec:
+  ipFamilies:
+  - IPv4
+  - IPv6
+  ipFamilyPolicy: PreferDualStack
+  ports:
+  - name: http
+    port: 8080
+  selector:
+    app: buyback
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: configuration
+  namespace: mrakaki
+spec:
+  ipFamilies:
+  - IPv4
+  - IPv6
+  ipFamilyPolicy: PreferDualStack
+  ports:
+  - name: http
+    port: 8888
+  selector:
+    app: configuration
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: universe
+  namespace: mrakaki
+spec:
+  ipFamilies:
+  - IPv4
+  - IPv6
+  ipFamilyPolicy: PreferDualStack
+  ports:
+  - name: http
+    port: 8080
+  selector:
+    app: universe
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: authentication
+  name: authentication
+  namespace: mrakaki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authentication
+  template:
+    metadata:
+      labels:
+        app: authentication
+    spec:
+      containers:
+      - env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production
+        - name: SPRING_CONFIG_IMPORT
+          value: configserver:http://configuration:8888
+        image: mrakaki/dev-containers:mrakaki-eve-auth.0.0.1
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /actuator/health/liveness
+            port: 2022
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        name: authentication
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /actuator/health/readiness
+            port: 2022
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 300m
+            memory: 300Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: buyback
+  name: buyback
+  namespace: mrakaki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buyback
+  template:
+    metadata:
+      labels:
+        app: buyback
+    spec:
+      containers:
+      - env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production
+        - name: SPRING_CONFIG_IMPORT
+          value: configserver:http://configuration:8888
+        image: mrakaki/dev-containers:mrakaki-eve-buyback.0.0.3
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /actuator/health/liveness
+            port: 2022
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        name: buyback
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /actuator/health/readiness
+            port: 2022
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 300m
+            memory: 300Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: configuration
+  name: configuration
+  namespace: mrakaki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: configuration
+  template:
+    metadata:
+      labels:
+        app: configuration
+    spec:
+      containers:
+      - image: mrakaki/dev-containers:mrakaki-eve-config.0.0.2
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /actuator/health/liveness
+            port: 2022
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        name: configuration
+        ports:
+        - containerPort: 8888
+          name: http
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /actuator/health/readiness
+            port: 2022
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        resources:
+          limits:
+            cpu: 500m
+            memory: 256Mi
+          requests:
+            cpu: 250m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: universe
+  name: universe
+  namespace: mrakaki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: universe
+  template:
+    metadata:
+      labels:
+        app: universe
+    spec:
+      containers:
+      - env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production
+        - name: SPRING_CONFIG_IMPORT
+          value: configserver:http://configuration:8888
+        image: mrakaki/dev-containers:mrakaki-eve-universe.0.0.5
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /actuator/health/liveness
+            port: 2022
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        name: universe
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /actuator/health/readiness
+            port: 2022
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+          requests:
+            cpu: 750m
+            memory: 768Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: universe-update-orders
+  namespace: mrakaki
+spec:
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - args:
+            - updateOrders
+            env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production
+            - name: SPRING_CONFIG_IMPORT
+              value: configserver:http://configuration:8888
+            image: mrakaki/dev-containers:mrakaki-eve-universe.0.0.5
+            name: universe
+            resources:
+              limits:
+                cpu: 1000m
+                memory: 1Gi
+              requests:
+                cpu: 750m
+                memory: 768Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                - ALL
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+  schedule: 15 */4 * * *
+  successfulJobsHistoryLimit: 0

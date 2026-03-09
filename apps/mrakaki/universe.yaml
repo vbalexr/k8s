@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: universe
+  namespace: mrakaki
+  labels:
+    app: universe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: universe
+  template:
+    metadata:
+      labels:
+        app: universe
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: universe
+        image: mrakaki/dev-containers:mrakaki-eve-universe.0.0.5
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production
+        - name: SPRING_CONFIG_IMPORT
+          value: configserver:http://configuration:8888
+        ports:
+          - name: http
+            containerPort: 8080
+        resources:
+          requests:
+            memory: "768Mi"
+            cpu: "750m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 2022
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 2022
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 30

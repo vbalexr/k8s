@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configuration
+  labels:
+    app: configuration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: configuration
+  template:
+    metadata:
+      labels:
+        app: configuration
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: configuration
+        image: mrakaki/dev-containers:mrakaki-eve-config.0.0.2
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+          - name: http
+            containerPort: 8888
+        volumeMounts:
+        - name: config-temp
+          mountPath: /.config
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 2022
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 2022
+          failureThreshold: 5
+          initialDelaySeconds: 30
+          periodSeconds: 30
+      volumes:
+      - name: config-temp
+        emptyDir: {}
