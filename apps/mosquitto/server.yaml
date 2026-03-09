@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+  labels:
+    app: mosquitto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: mosquitto
+        image: eclipse-mosquitto:2.0.22 # {"$imagepolicy": "flux-system:mosquitto"}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+          - name: mqtt
+            containerPort: 1883
+          - name: mqtt-ws
+            containerPort: 8001
+        volumeMounts:
+          - name: config
+            mountPath: /mosquitto/config
+          - mountPath: /mosquitto
+            name: data
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 50m
+            memory: 64Mi
+      volumes:
+        - name: config
+          configMap:
+            name: mosquitto-config
+            defaultMode: 420
+        - name: data
+          persistentVolumeClaim:
+            claimName: mosquitto

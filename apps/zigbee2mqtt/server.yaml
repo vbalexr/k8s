@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zigbee2mqtt
+  labels:
+    app: zigbee2mqtt
+spec:
+  strategy:
+    type: Recreate
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zigbee2mqtt
+  template:
+    metadata:
+      labels:
+        app: zigbee2mqtt
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: zigbee2mqtt
+        image: koenkk/zigbee2mqtt:2.8.0 # {"$imagepolicy": "flux-system:zigbee2mqtt"}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - name: web
+          containerPort: 8080
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "50m"
+        volumeMounts:
+        - mountPath: /app/data
+          name: config
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: zigbee2mqtt
