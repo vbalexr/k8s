@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: allianceauth-beat
+  labels:
+    app: allianceauth-beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: allianceauth-beat
+  template:
+    metadata:
+      labels:
+        app: allianceauth-beat
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 61000
+        runAsGroup: 61000
+        fsGroup: 61000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: allianceauth
+          workingDir: /home/allianceauth/myauth
+          image: registry.gitlab.com/allianceauth/allianceauth/auth:v4.13.0 # {"$imagepolicy": "flux-system:allianceauth"}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+          command:
+            - sh
+            - -c
+          args:
+            - mkdir -p /home/allianceauth/log && pip install --upgrade -r /home/allianceauth/myauth/requirements.txt && exec celery -A myauth beat
+          envFrom:
+            - secretRef:
+                name: allianceauth-env
+                optional: true
+          volumeMounts:
+            - name: config
+              mountPath: /home/allianceauth/myauth
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: allianceauth-config

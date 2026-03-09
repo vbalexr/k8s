@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: allianceauth-gunicorn
+  labels:
+    app: allianceauth-gunicorn
+spec:
+  type: ClusterIP
+  selector:
+    app: allianceauth-gunicorn
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+      protocol: TCP
