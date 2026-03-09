@@ -63,7 +63,9 @@
 ---
 
 ## CNI (Cilium)
-- **Main CNI device:** `eth2`
+- **Devices:**
+  - `bond0` - LoadBalancer/BGP traffic (external)
+  - `eth2` - Pod-to-pod native routing (internal)
 - **LB IP pools**
   - **public:** `fd7a:6e5b:cafe:10:1::1/120`, `10.1.1.0/24`
   - **private:** `fd7a:6e5b:cafe:10:2::1/120`, `10.1.2.0/24`

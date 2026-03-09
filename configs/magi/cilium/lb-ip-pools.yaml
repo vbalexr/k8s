@@ -3,15 +3,23 @@ kind: CiliumLoadBalancerIPPool
 metadata:
   name: public
 spec:
+  serviceSelector:
+    matchLabels:
+      lb-pool: public
   blocks:
     - cidr: "fd7a:6e5b:cafe:10:1::1/120"
-    - cidr: "10.1.1.0/24"
+    - start: "10.1.1.1"
+      stop: "10.1.1.250"
 ---
 apiVersion: cilium.io/v2
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: private
 spec:
+  serviceSelector:
+    matchLabels:
+      lb-pool: private
   blocks:
     - cidr: "fd7a:6e5b:cafe:10:2::1/120"
-    - cidr: "10.1.2.0/24"
+    - start: "10.1.2.1"
+      stop: "10.1.2.250"

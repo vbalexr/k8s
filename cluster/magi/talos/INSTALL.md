@@ -45,7 +45,7 @@ Edit the node files and confirm the install disk matches your OS disk (should be
 - [cluster/magi/talos/config/node-casper.yaml](cluster/magi/talos/config/node-casper.yaml)
 - [cluster/magi/talos/config/node-melchior.yaml](cluster/magi/talos/config/
 
-Each node config must include `kubelet.nodeIP.validSubnets` pointing to the eth2 network (10.255.100.0/24) so that Cilium uses eth2 for pod-to-pod traffic instead of bond0.
+Each node config must include `kubelet.nodeIP.validSubnets` pointing to the eth2 network (10.255.100.0/24) for pod-to-pod communication. Cilium will use bond0 for external LoadBalancer traffic (BGP) and eth2 for pod networking via native routing.
 
 Optional adjustments (if needed):
 - Bond mode (`active-backup` vs `802.3ad`)
@@ -153,6 +153,7 @@ You should see:
 
 ## 9) Install Cilium
 
+```sh
 cilium install \
     --set ipv6.enabled=true \
     --set ipam.mode=kubernetes \
@@ -166,4 +167,19 @@ cilium install \
     --set gatewayAPI.enabled=true \
     --set gatewayAPI.enableAlpn=true \
     --set gatewayAPI.enableAppProtocol=true \
-    --set bgpControlPlane.enabled=true 
+    --set bgpControlPlane.enabled=true \
+    --set autoDirectNodeRoutes=true \
+    --set cluster.name=magi \
+    --set operator.replicas=1 \
+    --set routingMode=native \
+    --set ipv4NativeRoutingCIDR=10.255.100.0/24 \
+    --set ipv6NativeRoutingCIDR=fd7a:6e5b:beff::/64 \
+    --set devices=bond0 \
+    --set directRoutingDevice=bond0 \
+    --set tunnelProtocol=vxlan
+```
+
+**Important**: 
+- `devices=bond0` is critical for LoadBalancer services to work with BGP, as external traffic arrives on bond0
+- `directRoutingDevice=bond0` ensures Cilium attaches BPF programs to the correct interface
+- Native routing uses eth2 (10.255.100.0/24) for pod-to-pod traffic and bond0 for external traffic
