@@ -1,19 +1,56 @@
-apiVersion: cilium.io/v2alpha1
-kind: CiliumBGPPeeringPolicy
+---
+apiVersion: cilium.io/v2
+kind: CiliumBGPClusterConfig
 metadata:
   name: magi-bgp
 spec:
   nodeSelector:
     matchLabels: {}
-  virtualRouters:
-    - localASN: 64513
-      exportPodCIDR: false
-      neighbors:
-        - peerAddress: "fd7a:6e5b:cafe:10::2/128"
+  bgpInstances:
+    - name: main
+      localASN: 64513
+      peers:
+        - name: peer-ipv6-1
           peerASN: 64512
-        - peerAddress: "fd7a:6e5b:cafe:10::3/128"
+          peerConfigRef:
+            name: magi-peer-config
+          peerAddress: "fd7a:6e5b:cafe:10::2"
+        - name: peer-ipv6-2
           peerASN: 64512
-        - peerAddress: "10.1.0.2/32"
+          peerConfigRef:
+            name: magi-peer-config
+          peerAddress: "fd7a:6e5b:cafe:10::3"
+        - name: peer-ipv4-1
           peerASN: 64512
-        - peerAddress: "10.1.0.3/32"
+          peerConfigRef:
+            name: magi-peer-config
+          peerAddress: "10.1.0.2"
+        - name: peer-ipv4-2
           peerASN: 64512
+          peerConfigRef:
+            name: magi-peer-config
+          peerAddress: "10.1.0.3"
+---
+apiVersion: cilium.io/v2
+kind: CiliumBGPPeerConfig
+metadata:
+  name: magi-peer-config
+spec:
+  gracefulRestart:
+    enabled: true
+    restartTimeSeconds: 15
+  families:
+    - afi: ipv4
+      safi: unicast
+      advertisements:
+        matchLabels:
+          advertise: bgp
+    - afi: ipv6
+      safi: unicast
+      advertisements:
+        matchLabels:
+          advertise: bgp
+  timers:
+    connectRetryTimeSeconds: 120
+    holdTimeSeconds: 90
+    keepAliveTimeSeconds: 30
