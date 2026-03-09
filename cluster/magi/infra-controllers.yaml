@@ -12,6 +12,8 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
+  dependsOn:
+    - name: flux-system
   decryption:
     provider: sops
     secretRef:

@@ -4,3 +4,5 @@ resources:
   - infra-controllers.yaml
   - infra-configs.yaml
   - namespace-databases.yaml
+  - namespace-sspti.yaml
+  - namespace-tunnels.yaml
