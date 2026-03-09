@@ -8,6 +8,10 @@ resources:
   - ../../../apps/mariadb
   - mariadb-credentials.yaml
 
+  - ../../../apps/postgres
+  - postgres-credentials.yaml
+
 patches:
   - path: patches/redis.yaml
   - path: patches/mariadb.yaml
+  - path: patches/postgres.yaml

@@ -1,0 +1,65 @@
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  serviceName: postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: postgres
+        image: tensorchord/vchord-postgres:pg18-v1.1.1
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        env:
+          # fix issue with db not starting because folder is not empty
+          - name: PGDATA
+            value: /var/lib/postgresql/data/pgdata
+          - name: POSTGRES_PASSWORD
+            valueFrom: 
+              secretKeyRef:
+                name: postgres-credentials
+                key: password
+          - name: POSTGRES_USER
+            valueFrom: 
+              secretKeyRef:
+                name: postgres-credentials
+                key: user
+          - name: POSTGRES_INITDB_ARGS
+            value: '--data-checksums'
+        resources:
+          requests:
+            cpu: 2000m
+            memory: 6Gi
+        ports:
+        - containerPort: 5432
+          name: "postgres"
+        volumeMounts:
+        - name: postgres
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 128Gi
