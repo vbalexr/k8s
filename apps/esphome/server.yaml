@@ -1,0 +1,44 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: esphome
+spec:
+  selector:
+    matchLabels:
+      app: esphome
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: esphome
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: esphome
+        image: ghcr.io/esphome/esphome:2025.11.0-dev20251012
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        ports:
+        - containerPort: 6052
+          name: "http"
+        volumeMounts:
+        - name: data
+          mountPath: /config
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 1.5G
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: esphome-data

@@ -1,0 +1,30 @@
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: home
+  namespace: home
+spec:
+  config: |
+    {
+      "cniVersion": "0.3.1",
+      "type": "macvlan",
+      "master": "bond0.15",
+      "mode": "bridge",
+      "ipam": {
+        "type": "whereabouts",
+        "ranges": [
+          {
+            "range": "172.16.15.0/24",
+            "range_start": "172.16.15.200",
+            "range_end": "172.16.15.250",
+            "gateway": "172.16.15.1"
+          },
+          {
+            "range": "fd7a:6e5b:beff:15::/64",
+            "range_start": "fd7a:6e5b:beff:15::200",
+            "range_end": "fd7a:6e5b:beff:15::250",
+            "gateway": "fd7a:6e5b:beff:15::1"
+          }
+        ]
+      }
+    }

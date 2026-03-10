@@ -3,15 +3,24 @@ kind: Kustomization
 namespace: home
 resources:
   - namespace.yaml
+
+  - home-nad.yaml
+  - iot-nad.yaml
+  - cameras-nad.yaml
+  
+
   - ../../../apps/mosquitto
   - ../../../apps/zigbee2mqtt
 
   - immich-postgres-config.yaml
   - immich-redis-config.yaml
   - ../../../apps/immich
+
+  - ../../../apps/esphome
  
 patches:
   - path: patches/mosquitto.yaml
   - path: patches/zigbee2mqtt.yaml
   - path: patches/immich.yaml
+  - path: patches/esphome.yaml
   
