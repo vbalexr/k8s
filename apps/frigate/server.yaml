@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: frigate
+  labels:
+    app: frigate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frigate
+  serviceName: frigate
+  template:
+    metadata:
+      labels:
+        app: frigate
+    spec:
+      containers:
+      - name: frigate
+        image: ghcr.io/blakeblackshear/frigate:0.17.0 # {"$imagepolicy": "flux-system:frigate"}
+        securityContext:
+          privileged: true
+          runAsUser: 0
+          runAsGroup: 0
+          allowPrivilegeEscalation: true
+        resources:
+          requests:
+            cpu: 1
+            memory: "2Gi"
+        ports:
+        - name: https
+          containerPort: 8971
+          protocol: TCP
+        - name: http
+          containerPort: 5000
+          protocol: TCP
+        - name: rtsp
+          containerPort: 8554
+          protocol: TCP
+        - name: webrtc-tcp
+          containerPort: 8555
+          protocol: TCP
+        - name: webrtc-udp
+          containerPort: 8555
+          protocol: UDP
+        volumeMounts:
+        - mountPath: /media/frigate
+          name: media
+        - mountPath: /config
+          name: config
+        - mountPath: /tmp/cache
+          name: cache-tmpfs
+        - mountPath: /dev/shm
+          name: shm
+        - mountPath: /dev/apex_0
+          name: apex0
+        - mountPath: /dev/dri/renderD128
+          name: dri-render
+      volumes:
+      - name: cache-tmpfs
+        emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 256Mi
+      - name: apex0
+        hostPath:
+          path: /dev/apex_0
+          type: CharDevice
+      - name: dri-render
+        hostPath:
+          path: /dev/dri/renderD128
+          type: CharDevice
+  volumeClaimTemplates:
+  - metadata:
+      name: config
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: media
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 768Gi

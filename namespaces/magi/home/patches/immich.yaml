@@ -20,13 +20,3 @@ spec:
   ipFamilies:
     - IPv4
     - IPv6
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: immich
-spec:
-  template:
-    metadata:
-      annotations:
-        k8s.v1.cni.cncf.io/networks: home

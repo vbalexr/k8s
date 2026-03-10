@@ -7,3 +7,4 @@ resources:
   - namespace-sspti.yaml
   - namespace-tunnels.yaml
   - namespace-mrakaki.yaml
+  - namespace-cameras.yaml

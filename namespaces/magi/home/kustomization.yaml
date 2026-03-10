@@ -6,8 +6,6 @@ resources:
 
   - home-nad.yaml
   - iot-nad.yaml
-  - cameras-nad.yaml
-  
 
   - ../../../apps/mosquitto
   - ../../../apps/zigbee2mqtt
