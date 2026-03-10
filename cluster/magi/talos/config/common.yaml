@@ -36,8 +36,6 @@ machine:
       - fd7a:6e5b:cafe:10::1
     interfaces:
       - interface: bond0
-        vip:
-          ip: fd7a:6e5b:cafe:10::5
         vlans:
           - vlanId: 15
             dhcp: false
@@ -51,11 +49,13 @@ machine:
   install:
     bootloader: true
     wipe: true
-    image: factory.talos.dev/installer/8f85ef12ec6c83f2316356429381f46744417b8a3cacde5756424ecb19fac9fe:v1.12.4
+    image: factory.talos.dev/installer/fd5420096bc116ef7eb6952e8ea7ef83efa4d515c7cf98079501cc2aabda85c5:v1.12.5
   kernel:
     modules:
       - name: nvme_tcp
       - name: vfio_pci
+      - name: gasket
+      - name: apex
   sysctls:
     vm.nr_hugepages: "1024"
 

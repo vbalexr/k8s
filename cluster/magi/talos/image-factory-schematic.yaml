@@ -7,6 +7,7 @@ customization:
       - siderolabs/intel-ucode
       - siderolabs/thunderbolt
       - siderolabs/nut-client
+      - siderolabs/gasket-driver
   extraKernelArgs:
     - intel_iommu=on
     - iommu=pt
